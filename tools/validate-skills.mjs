@@ -59,7 +59,7 @@ export function pathIsInside(root, path) {
 }
 
 // A backticked path in prose is not a markdown link, so validateSkillsTree
-// never sees it; that is how codex-tools.md came to tell the reader to open
+// never sees it; that is how devin-tools.md came to tell the reader to open
 // agents/comment-sicko.md, a file a skills-only install lacks. The defect is
 // a filesystem fact: the token names something that exists in the plugin
 // (beside the skills tree, or reachable through ../) but not inside the

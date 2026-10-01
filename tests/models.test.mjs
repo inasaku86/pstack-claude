@@ -20,7 +20,7 @@ describe("committed models.json", () => {
   test("available models are the names the Claude Code Agent tool accepts", () => {
     // The Agent tool's `model` parameter is an enum of family names; a full ID
     // such as claude-opus-5-5 is rejected before the subagent starts.
-    expect([...models.available].sort()).toEqual(["fable", "haiku", "opus", "sonnet"]);
+    expect([...models.available].sort()).toEqual(["swe-2-high", "swe-2-max", "swe-2-medium"]);
   });
 
   test("the file stays one row per entry so a role change is a one-line diff", () => {
@@ -48,7 +48,7 @@ describe("parseModels", () => {
 
   test("a missing top-level key throws naming it", () => {
     expect(parse((p) => delete p.efforts)).toThrow('models.json: "efforts" must be a list');
-    expect(parse((p) => delete p.codex)).toThrow('models.json: "codex" must be an object');
+    expect(parse((p) => delete p.devin)).toThrow('models.json: "devin" must be an object');
   });
 
   test("a role naming an undefined tier throws naming the role and the tier", () => {
@@ -61,7 +61,7 @@ describe("parseModels", () => {
     expect(parse((p) => (role(p, "swarm workers").models = ["opsu"]))).toThrow(
       'models.json: role "swarm workers" names "opsu", which is not in available',
     );
-    expect(parse((p) => (p.tiers.panel = ["opus", "gpt"]))).toThrow(
+    expect(parse((p) => (p.tiers.panel = ["swe-2-medium", "gpt"]))).toThrow(
       'models.json: tier "panel" names "gpt", which is not in available',
     );
   });
@@ -91,9 +91,9 @@ describe("parseModels", () => {
   });
 
   test("a duplicate slug in available or in a panel throws naming it", () => {
-    expect(parse((p) => p.available.push("opus"))).toThrow('models.json: available lists "opus" twice');
-    expect(parse((p) => (p.tiers.panel = ["opus", "opus"]))).toThrow('models.json: tier "panel" lists "opus" twice');
-    expect(parse((p) => (p.codex.panel = ["a", "a"]))).toThrow('models.json: codex "panel" lists "a" twice');
+    expect(parse((p) => p.available.push("swe-2-medium"))).toThrow('models.json: available lists "swe-2-medium" twice');
+    expect(parse((p) => (p.tiers.panel = ["swe-2-medium", "swe-2-medium"]))).toThrow('models.json: tier "panel" lists "swe-2-medium" twice');
+    expect(parse((p) => (p.devin.panel = ["a", "a"]))).toThrow('models.json: devin "panel" lists "a" twice');
   });
 
   test("an effort level Claude Code does not accept, or a repeated one, throws naming it", () => {
@@ -109,9 +109,9 @@ describe("parseModels", () => {
     );
   });
 
-  test("a codex block that misses or adds a tier throws naming the tier", () => {
-    expect(parse((p) => delete p.codex.strongest)).toThrow('models.json: codex has no example for tier "strongest"');
-    expect(parse((p) => (p.codex.fastest = "gpt"))).toThrow('models.json: codex names "fastest", which is not a tier');
+  test("a devin block that misses or adds a tier throws naming the tier", () => {
+    expect(parse((p) => delete p.devin.strongest)).toThrow('models.json: devin has no example for tier "strongest"');
+    expect(parse((p) => (p.devin.fastest = "gpt"))).toThrow('models.json: devin names "fastest", which is not a tier');
   });
 });
 

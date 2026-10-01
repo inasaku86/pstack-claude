@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   agentSkills,
-  codexModelNamesSection,
+  devinModelNamesSection,
   PORTABLE_ASSETS,
   plan,
   problems,
@@ -234,7 +234,7 @@ describe("shared Agent Skills tree", () => {
       const poteto = join(installed, "poteto-mode");
       for (const file of [
         join(poteto, "SKILL.md"),
-        join(poteto, "references", "codex-tools.md"),
+        join(poteto, "references", "devin-tools.md"),
         join(poteto, "..", "principle-model-the-domain", "SKILL.md"),
       ]) {
         expect(readFileSync(file, "utf8").length).toBeGreaterThan(0);
@@ -282,19 +282,21 @@ describe("agentSkills reads frontmatter as YAML", () => {
   });
 });
 
-describe("Codex model names", () => {
-  test("names a strongest Codex model for the roles that default to it on Claude", () => {
+describe("Devin model names", () => {
+  test("names a strongest Devin mode for the roles that default to it", () => {
     const raw = JSON.parse(readFileSync(join(repoRoot, "plugins/pstack/models.json"), "utf8"));
-    const oneOff = raw.roles.map((r) => (r.role === "swarm workers" ? { ...r, models: ["haiku"] } : r));
-    const section = codexModelNamesSection(resolveModels({ ...raw, roles: oneOff }));
-    const strongestLine = section.split("\n").find((line) => line.includes("strongest Claude model"));
+    const oneOff = raw.roles.map((r) => (r.role === "swarm workers" ? { ...r, models: ["swe-2-high"] } : r));
+    const section = devinModelNamesSection(resolveModels({ ...raw, roles: oneOff }));
+    const strongestLine = section.split("\n").find((line) => line.includes("strongest tier"));
 
     expect(strongestLine).not.toContain("swarm workers");
 
-    expect(strongestLine).toContain(`\`${raw.codex.strongest}\``);
+    expect(strongestLine).toContain(`\`${raw.devin.strongest}\``);
     for (const role of ["bug-fix", "perf-issue", "hillclimb", "strongest judgment"]) {
       expect(section).toContain(role);
     }
-    for (const family of raw.available) expect(section).not.toContain(`\`${family}\``);
+    for (const mode of [raw.devin.default, raw.devin.strongest, ...raw.devin.panel]) {
+      expect(section).toContain(`\`${mode}\``);
+    }
   });
 });

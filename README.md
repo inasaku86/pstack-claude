@@ -1,6 +1,6 @@
 # pstack
 
-Lauren Tan's [pstack](https://github.com/cursor/plugins/tree/main/pstack) is an opinionated Cursor skill stack that improves agent outcomes. This is a port for Claude Code, Codex and other agent harnesses. It tracks upstream and also carries named policy forks, each declared in [`tools/forks.json`](tools/forks.json).
+Lauren Tan's [pstack](https://github.com/cursor/plugins/tree/main/pstack) is an opinionated Cursor skill stack that improves agent outcomes. This fork retargets the port at [Devin](https://devin.ai): every model role routes to SWE-2 (`swe-2-medium`, `swe-2-high`, `swe-2-max`) and tool names resolve through a Devin mapping instead of Codex's. Based on [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude), which ports pstack for Claude Code and Codex.
 
 Tell `poteto-mode` your goal and it will invoke the correct workflow for the task. It keeps your code concise, simple and verified.
 
@@ -15,18 +15,15 @@ Run in Claude Code:
 /plugin install pstack@pstack-claude
 ```
 
-### Codex
+### Devin
 
-Run in your terminal:
+Install `plugins/pstack` from this repository as a Devin plugin (Devin loads `skills/`, `agents/`, and plugin rules). Once installed, pstack skills are available in every session and the `poteto-mode-routing` rule auto-routes qualifying tasks.
 
-```shell
-codex plugin marketplace add michael-denyer/pstack-claude
-codex plugin add pstack@pstack-claude
-```
+Every pstack role dispatches subagents through `devin_session_create` with a `devin_mode` of `swe-2-medium`, `swe-2-high`, or `swe-2-max`; `references/devin-tools.md` inside `poteto-mode` is the Claude-to-Devin tool and model map. No other model names appear anywhere in the plugin, so nothing can route to a non-SWE-2 model by accident.
 
-Run `setup-pstack` to change model defaults, set a reasoning effort per role (for example `arena runners: opus @xhigh, fable @max`, which Claude Code dispatches through the plugin's `pstack:effort-<level>` or `pstack:poteto-agent-<level>` agents; roles without a level keep the session's effort unless the sheet's `default effort` line names one), or turn automatic routing off. The plugin installs the routing hook on Claude Code and Codex; Codex asks you to trust it through `/hooks` before it runs. In Claude Code, use `/pstack:setup-pstack`.
+Run `setup-pstack` to change role defaults, set a reasoning effort per role (for example `arena runners: swe-2-medium @xhigh, swe-2-high @max` — on Devin the level folds into the mode choice, so `xhigh` means `swe-2-high` and `max` means `swe-2-max`), or turn automatic routing off by disabling the rule or writing `session hook: off` in `~/.devin/pstack-models.md`.
 
-For Prime Agent, OpenCode, Gemini CLI, or skills-only installs for any harness, see [shared installation](docs/reference.md#shared-skills-installation).
+For Claude Code, Codex, Prime Agent, OpenCode, or Gemini CLI installs, see the upstream README and [shared installation](docs/reference.md#shared-skills-installation).
 
 ## Getting started
 

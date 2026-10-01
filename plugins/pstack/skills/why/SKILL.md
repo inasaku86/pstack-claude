@@ -5,7 +5,8 @@ description: "Use for 'why does X work this way', 'why we picked Y', design rati
 
 # Why
 
-On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
+On Devin, read the [platform mapping](../poteto-mode/references/devin-tools.md), including its per-skill notes, before following this skill.
+
 
 Investigate the motivation and intent behind code.
 
@@ -162,9 +163,9 @@ After the Sources Consulted block, if the user's `why` question is a precursor t
 
 Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.
 
-- why investigators: `opus`
-- why synthesizer: `opus`
+- why investigators: `swe-2-medium`
+- why synthesizer: `swe-2-medium`
 
 ## Reasoning effort
 
-A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. Levels on Claude Code: `low`, `medium`, `high`, `xhigh`, `max`. Which ones apply depends on the model. A value without `@` takes the sheet's `default effort` line, a level or `session`, and `session` when the sheet has no such line. `session` sets no effort, so the dispatch is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` at every level, and a model name is passed as `model`. On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. `pstack:poteto-agent` becomes `subagent_type: "pstack:poteto-agent-<level>"`. `general-purpose`, or no `subagent_type`, becomes `subagent_type: "pstack:effort-<level>"`. The effort agents set only `effort`, so the model you pass still decides the model. On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions.
+A role value in the override sheet may name a reasoning effort after its model, as in `swe-2-medium @xhigh`. Levels: `low`, `medium`, `high`, `xhigh`, `max`. Which ones apply depends on the model. A value without `@` takes the sheet's `default effort` line, a level or `session`, and `session` when the sheet has no such line. `session` sets no effort, so the dispatch is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` at every level, and a model name is passed as `model`. On Devin there is no per-call effort parameter separate from the mode: `low` and `medium` map to `swe-2-medium`, `high` and `xhigh` to `swe-2-high`, and `max` to `swe-2-max`. Combine the level with the role's model by choosing the stronger of the two SWE-2 modes.
