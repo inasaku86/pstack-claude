@@ -49,12 +49,13 @@ All runtimes share [one skills tree](../plugins/pstack/skills/). A skills-only i
 | Runtime | Setup and recorded verification |
 | --- | --- |
 | Claude Code | Install the marketplace plugin. Skills use Claude tool names and model defaults; the plugin installs automatic routing. |
-| Codex | Install the native plugin through the repository's marketplace and trust its hook through `/hooks`. The [Codex mapping](../plugins/pstack/skills/poteto-mode/references/codex-tools.md) translates Claude tools and model names. Shared skill symlinks were also detected in a live session. |
+| Codex | Install the native plugin through the repository's marketplace and trust its hook through `/hooks`. Shared skill symlinks were also detected in a live session. |
+| Devin | Install `plugins/pstack` as a Devin plugin from this fork. The [Devin mapping](../plugins/pstack/skills/poteto-mode/references/devin-tools.md) translates Claude tools and model names to `devin_mode` values and Devin tools; routing ships as the plugin rule `poteto-mode-routing` since Devin does not run SessionStart hooks. |
 | Prime Agent | Its documentation describes shared-directory discovery; it has not been tested in a live session. Choose tools and models through Prime's configuration. |
 | opencode | Discovery and reading a linked skill were verified on version 1.18.25. Configure agents, commands, and permissions in `opencode.json`. Its picker also lists principle skills. |
 | Gemini CLI | Its documentation describes shared-directory discovery; it has not been tested in a live session. Use `/skills list` to check discovery and `/skills reload` after changes. |
 
-These checks cover skill discovery. Delegation and multi-model workflows remain unverified on Prime Agent, opencode, and Gemini CLI. On those runtimes, agents must adapt Claude-specific tools, models, and configuration. The Codex mapping applies only to Codex.
+These checks cover skill discovery. Delegation and multi-model workflows remain unverified on Prime Agent, opencode, and Gemini CLI. On those runtimes, agents must adapt Claude-specific tools, models, and configuration. The Devin mapping applies only to Devin.
 
 ### Automatic routing
 
@@ -117,7 +118,7 @@ Request `poteto-mode` by name or select its entry, such as `pstack:poteto-mode`.
 multi_agent = true
 ```
 
-Add this setting to `~/.codex/config.toml` if subagents are disabled. Skills such as `arena`, `interrogate`, and `architect` use parallel agents. The [mapping](../plugins/pstack/skills/poteto-mode/references/codex-tools.md) describes a sequential fallback and translates Claude tool names, model defaults, and verification instructions.
+Add this setting to `~/.codex/config.toml` if subagents are disabled. Skills such as `arena`, `interrogate`, and `architect` use parallel agents. The [mapping](../plugins/pstack/skills/poteto-mode/references/devin-tools.md) describes a sequential fallback and translates Claude tool names, model defaults, and verification instructions.
 
 For optional slash-command shortcuts, run this from the clone's root:
 
@@ -153,7 +154,7 @@ Install the Claude Code skill-authoring companion with:
 /plugin install plugin-dev@claude-plugins-official
 ```
 
-Those authoring workflows need `plugin-dev` for their guidance; other workflows do not. Codex uses the equivalent named in its [mapping](../plugins/pstack/skills/poteto-mode/references/codex-tools.md#driver-and-bundled-skills-pstack-references).
+Those authoring workflows need `plugin-dev` for their guidance; other workflows do not. Devin uses the equivalent named in its [mapping](../plugins/pstack/skills/poteto-mode/references/devin-tools.md#driver-and-bundled-skills-pstack-references).
 
 Playbooks use the runtime's task-tracking tools or an uncommitted `todo.md` checklist. For Claude Code, the repository documents `CLAUDE_CODE_ENABLE_TODO_TOOLS=1`; see [platform adaptation](../plugins/pstack/skills/poteto-mode/SKILL.md#platform-adaptation).
 

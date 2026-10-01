@@ -426,7 +426,7 @@ describe("deriveSkill", () => {
   test("appends the Reasoning effort section after the Models section", () => {
     const out = deriveSkill("plugins/pstack/skills/how/SKILL.md", front("disable-model-invocation: true\n"), models, leads);
     expect(out.indexOf("## Models")).toBeLessThan(out.indexOf("## Reasoning effort"));
-    expect(out).toContain("subagent_type: \"pstack:effort-<level>\"");
+    expect(out).toContain("`swe-2-high`");
   });
 
   test("stamps a file's lead line in its own paragraph under the first heading", () => {
@@ -453,28 +453,28 @@ describe("lead lines", () => {
     expect(stampLeadLine("no heading\n", "Lead.")).toBeNull();
   });
 
-  test("the Codex notes table lists its skills in row order and rejects a row without one", () => {
-    const table = (...rows) => ["| Skill | On Codex |", "|-------|----------|", ...rows, "", "after"].join("\n");
+  test("the Devin notes table lists its skills in row order and rejects a row without one", () => {
+    const table = (...rows) => ["| Skill | On Devin |", "|-------|----------|", ...rows, "", "after"].join("\n");
     expect(codexNoteSkills(table("| `how` | fan-out |", "| `teach` | images |"))).toEqual(["how", "teach"]);
     expect(() => codexNoteSkills(table("| how | fan-out |"))).toThrow("does not start with a backticked skill: | how |");
-    expect(() => codexNoteSkills("no table\n")).toThrow('"| Skill | On Codex |" table header not found');
+    expect(() => codexNoteSkills("no table\n")).toThrow('"| Skill | On Devin |" table header not found');
   });
 
-  test("a prompt stub points at codex-tools.md unless its skill carries the Codex preamble", () => {
-    const pointer = "through `poteto-mode/references/codex-tools.md`, including its Per-skill notes.";
+  test("a prompt stub points at devin-tools.md unless its skill carries the Devin preamble", () => {
+    const pointer = "through `poteto-mode/references/devin-tools.md`, including its Per-skill notes.";
     expect(promptStub({ name: "tdd", menu: "m" }, { preamble: false })).toContain(pointer);
     expect(promptStub({ name: "how", menu: "m" }, { preamble: true })).toBe(
       "---\nname: how\ndescription: m\ndisable-model-invocation: true\n---\n\nInvoke the `how` skill and follow it.\n",
     );
   });
 
-  test("a prompt stub repeats the codex-tools.md pointer only when its skill lacks the stamped preamble", () => {
+  test("a prompt stub repeats the devin-tools.md pointer only when its skill lacks the stamped preamble", () => {
     const { files } = plan(repoRoot);
     const stubs = Object.keys(files).filter((rel) => rel.startsWith("plugins/pstack/.codex-plugin/prompts/"));
-    const pointsAtMapping = (rel) => files[rel].includes("codex-tools.md");
+    const pointsAtMapping = (rel) => files[rel].includes("devin-tools.md");
     const carriesPreamble = (rel) => {
       const skill = `plugins/pstack/skills/${basename(rel, ".md")}/SKILL.md`;
-      return readFileSync(join(repoRoot, skill), "utf8").includes("On Codex, read the [platform mapping]");
+      return readFileSync(join(repoRoot, skill), "utf8").includes("On Devin, read the [platform mapping]");
     };
     expect(stubs.filter(carriesPreamble).length).toBeGreaterThan(0);
     expect(stubs.filter((rel) => !carriesPreamble(rel)).length).toBeGreaterThan(0);
@@ -522,12 +522,11 @@ describe("effort agents", () => {
     expect(stampAgentPaths(out, ["./agents/a.md"])).toBe(out);
   });
 
-  test("the stamped section names every level, the default, both dispatch targets, and the Codex parameter", () => {
+  test("the stamped section names every level, the default, and the Devin mode mapping", () => {
     const text = effortSection(["low", "max"], "high");
     for (const level of ["low", "max", "high"]) expect(text).toContain(`\`${level}\``);
-    expect(text).toContain('subagent_type: "pstack:effort-<level>"');
-    expect(text).toContain('subagent_type: "pstack:poteto-agent-<level>"');
-    expect(text).toContain("`reasoning_effort`");
+    for (const mode of ["swe-2-medium", "swe-2-high", "swe-2-max"]) expect(text).toContain(`\`${mode}\``);
+    expect(text).toContain("`session`");
   });
 });
 
@@ -759,10 +758,10 @@ describe("plan, changes, apply", () => {
 
   test("problems reports a lead line in a file that does not own it", () => {
     const root = repoCopy();
-    const [, preamble] = [...loadLeadLines(root)].find(([, line]) => line.startsWith("On Codex"));
+    const [, preamble] = [...loadLeadLines(root)].find(([, line]) => line.startsWith("On Devin"));
     append(root, "plugins/pstack/skills/tdd/SKILL.md", `\n${preamble}\n`);
-    const codexTools = "plugins/pstack/skills/poteto-mode/references/codex-tools.md";
-    writeFileSync(join(root, codexTools), readFileSync(join(root, codexTools), "utf8").replace(/^\| `why` \|.*\n/m, ""));
+    const devinTools = "plugins/pstack/skills/poteto-mode/references/devin-tools.md";
+    writeFileSync(join(root, devinTools), readFileSync(join(root, devinTools), "utf8").replace(/^\| `why` \|.*\n/m, ""));
     const failures = problems(root).filter((f) => f.startsWith("generator-owned lead lines"));
     expect(failures).toHaveLength(1);
     expect(failures[0]).toContain("\nplugins/pstack/skills/why/SKILL.md:");

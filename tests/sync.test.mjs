@@ -1216,9 +1216,9 @@ describe("sync CLI", () => {
     cpSync(join(import.meta.dir, "../plugins/pstack/models.json"), join(port, "plugins/pstack/models.json"));
     mkdirSync(join(port, "plugins/pstack/skills"));
     writeFileSync(join(port, "plugins/pstack/skills/s.md"), localText);
-    const codexTools = join(port, "plugins/pstack/skills/poteto-mode/references/codex-tools.md");
-    mkdirSync(join(codexTools, ".."), { recursive: true });
-    writeFileSync(codexTools, "| Skill | On Codex |\n|-------|----------|\n");
+    const devinTools = join(port, "plugins/pstack/skills/poteto-mode/references/devin-tools.md");
+    mkdirSync(join(devinTools, ".."), { recursive: true });
+    writeFileSync(devinTools, "| Skill | On Devin |\n|-------|----------|\n");
     for (const { skill } of JSON.parse(readFileSync(join(port, "plugins/pstack/models.json"), "utf8")).roles) {
       mkdirSync(join(port, "plugins/pstack/skills", skill), { recursive: true });
       writeFileSync(join(port, "plugins/pstack/skills", skill, "SKILL.md"), "");
@@ -1290,7 +1290,7 @@ describe("sync CLI", () => {
       "\nforked (upstream untouched): 1\n     1 policy plugins/pstack/skills/s.md\n     1 total changed lines\n",
     );
     expect(result.stderr).not.toContain("tools/forks.json");
-    const portOnly = [...roleSkills.map((skill) => `${skill}/SKILL.md`), "poteto-mode/references/codex-tools.md"];
+    const portOnly = [...roleSkills.map((skill) => `${skill}/SKILL.md`), "poteto-mode/references/devin-tools.md"];
     expect(result.stdout).toContain(`\nport-only: ${portOnly.length} files\n`);
     for (const rel of portOnly) expect(result.stdout).toContain(`\n  plugins/pstack/skills/${rel}\n`);
   });

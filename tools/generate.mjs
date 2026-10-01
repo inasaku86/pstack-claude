@@ -16,14 +16,14 @@
 //   user-invocable: false); a skill without a row or a row without a skill
 //   fails by name.
 //   plugins/pstack/models.json (the model policy: role defaults, diverse panel,
-//   available slugs, Codex equivalents)
+//   available slugs, Devin equivalents)
 //     -> each model-consuming skill's "## Models" and "## Reasoning effort" sections
 //     -> setup-pstack's Models section and override-sheet block, and interrogate's reviewer table
-//     -> the "## Model names" section of poteto-mode/references/codex-tools.md
+//     -> the "## Model names" section of poteto-mode/references/devin-tools.md
 //     -> one effort agent pair per level in plugins/pstack/effort-agents/
-//   the Per-skill notes table in poteto-mode/references/codex-tools.md
-//     -> the Codex preamble under the first heading of each listed skill's SKILL.md,
-//        and the codex-tools.md pointer in the prompt stub of every other public skill
+//   the Per-skill notes table in poteto-mode/references/devin-tools.md
+//     -> the Devin preamble under the first heading of each listed skill's SKILL.md,
+//        and the devin-tools.md pointer in the prompt stub of every other public skill
 //   DRIVER_PLAYBOOKS -> the driver-skill line under each playbook's first heading
 //   plugins/pstack/{agents,effort-agents}/*.md -> the "agents" list in
 //     plugins/pstack/.claude-plugin/plugin.json (a list replaces the default
@@ -275,7 +275,7 @@ export function promptStub({ name, menu }, { preamble } = {}) {
   const pointer = preamble
     ? ""
     : " Resolve Claude tool names, Claude model names, and Claude built-in skills through " +
-      "`poteto-mode/references/codex-tools.md`, including its Per-skill notes.";
+      "`poteto-mode/references/devin-tools.md`, including its Per-skill notes.";
   return (
     `---\nname: ${name}\ndescription: ${menu}\ndisable-model-invocation: true\n---\n\n` +
     `Invoke the \`${name}\` skill and follow it.${pointer}\n`
@@ -377,18 +377,18 @@ export function regions(models) {
       render: () => [overrideSheetBlock(models)],
     },
     {
-      file: "plugins/pstack/skills/poteto-mode/references/codex-tools.md",
+      file: "plugins/pstack/skills/poteto-mode/references/devin-tools.md",
       name: "Model names section",
       locate: section("Model names"),
-      render: () => blankPadded(codexModelNamesSection(models)),
+      render: () => blankPadded(devinModelNamesSection(models)),
     },
   ];
 }
 
-const CODEX_TOOLS = `${SKILLS}/poteto-mode/references/codex-tools.md`;
-const CODEX_NOTES_HEADER = "| Skill | On Codex |";
+const CODEX_TOOLS = `${SKILLS}/poteto-mode/references/devin-tools.md`;
+const CODEX_NOTES_HEADER = "| Skill | On Devin |";
 const CODEX_PREAMBLE =
-  "On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.";
+  "On Devin, read the [platform mapping](../poteto-mode/references/devin-tools.md), including its per-skill notes, before following this skill.";
 const DRIVER_LINE = "Resolve the driver skill through [poteto-mode's Non-negotiables](../SKILL.md#non-negotiables).";
 const DRIVER_PLAYBOOKS = ["autopilot-full", "multi-phase-plan", "orchestrate", "refactoring", "shipping"];
 
@@ -475,7 +475,7 @@ export function parseModels(raw, skillExists) {
     }
   };
   for (const key of ["available", "efforts", "roles"]) if (!Array.isArray(raw[key])) fail(`"${key}" must be a list`);
-  for (const key of ["tiers", "codex"]) {
+  for (const key of ["tiers", "devin"]) {
     if (!raw[key] || typeof raw[key] !== "object") fail(`"${key}" must be an object`);
   }
   const available = new Set(raw.available);
@@ -517,11 +517,11 @@ export function parseModels(raw, skillExists) {
     fail(`defaultEffort "${raw.defaultEffort}" is not an effort level or "session"`);
   }
   for (const tier of Object.keys(raw.tiers)) {
-    if (!Object.hasOwn(raw.codex, tier)) fail(`codex has no example for tier "${tier}"`);
+    if (!Object.hasOwn(raw.devin, tier)) fail(`devin has no example for tier "${tier}"`);
   }
-  for (const [tier, value] of Object.entries(raw.codex)) {
-    if (!Object.hasOwn(raw.tiers, tier)) fail(`codex names "${tier}", which is not a tier`);
-    unique([value].flat(), `codex "${tier}"`);
+  for (const [tier, value] of Object.entries(raw.devin)) {
+    if (!Object.hasOwn(raw.tiers, tier)) fail(`devin names "${tier}", which is not a tier`);
+    unique([value].flat(), `devin "${tier}"`);
   }
   return resolveModels(raw);
 }
@@ -594,17 +594,15 @@ export function modelsSection(roles) {
 // dispatched through, with the model still passed on the call.
 export function effortSection(levels, defaultEffort) {
   return (
-    "A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. " +
-    "Levels on Claude Code: " + codeList(levels) + ". Which ones apply depends on the model. " +
+    "A role value in the override sheet may name a reasoning effort after its model, as in `swe-2-medium @xhigh`. " +
+    "Levels: " + codeList(levels) + ". Which ones apply depends on the model. " +
     "A value without `@` takes the sheet's `default effort` line, a level or `session`, " +
     `and ${code(defaultEffort)} when the sheet has no such line. \`session\` sets no effort, so the dispatch ` +
     "is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` " +
     "at every level, and a model name is passed as `model`. " +
-    "On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. " +
-    "`pstack:poteto-agent` becomes `subagent_type: \"pstack:poteto-agent-<level>\"`. " +
-    "`general-purpose`, or no `subagent_type`, becomes `subagent_type: \"pstack:effort-<level>\"`. " +
-    "The effort agents set only `effort`, so the model you pass still decides the model. " +
-    "On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions."
+    "On Devin there is no per-call effort parameter separate from the mode: `low` and `medium` map to " +
+    "`swe-2-medium`, `high` and `xhigh` to `swe-2-high`, and `max` to `swe-2-max`. Combine the level with " +
+    "the role's model by choosing the stronger of the two SWE-2 modes."
   );
 }
 
@@ -656,7 +654,7 @@ export function stampAgentPaths(manifestText, paths) {
 export function setupModelsSection(models) {
   return (
     "Stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`).\n\n" +
-    `- Available Claude models: ${codeList(models.available)}\n` +
+    `- Available models: ${codeList(models.available)}\n` +
     `- Default panel: ${codeList(models.tiers.panel)}\n` +
     `- Reasoning effort levels: ${codeList(models.efforts)}\n` +
     `- Default reasoning effort: ${code(models.defaultEffort)}\n` +
@@ -674,39 +672,42 @@ export function overrideSheetBlock(models) {
     "the values here override those defaults. Delete a line to fall back to the skill default. " +
     "A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `Agent` call omits `model`); " +
     "an alias entry in a panel list still counts toward that panel's fan-out. " +
-    "A model may carry a reasoning effort, as in `opus @xhigh` (levels: " + models.efforts.join(", ") + "); " +
+    "A model may carry a reasoning effort, as in `swe-2-medium @xhigh` (levels: " + models.efforts.join(", ") + "); " +
     "the role then runs through the pstack effort agent of that level, each entry of a panel list on its own. " +
     "`default effort` sets the level for a value without one; `session` keeps the parent session's effort. " +
-    "`session hook: off` stops the Claude Code or Codex SessionStart hook from injecting the poteto-mode mandate; " +
+    "`session hook: off` stops the SessionStart hook from injecting the poteto-mode mandate; " +
     "any other value, or no line, leaves it on.\n\n" +
     rows +
     `\n\ndefault effort: ${models.defaultEffort}\nsession hook: on`
   );
 }
 
-export function codexModelNamesSection(models) {
+export function devinModelNamesSection(models) {
   const strongest = models.roles.filter((r) => r.tier === "strongest");
   return (
-    "Skills name Claude defaults (a single-role default for code/prose/judgment plus a diverse-model panel for " +
-    "diverse-model panels; each model-consuming skill lists its own in a Models section). These slugs do not " +
-    "resolve on Codex. Substitute your configured Codex models:\n\n" +
-    `- Single-model roles: your primary Codex model (for example ${code(models.codex.default)}).\n` +
-    `- Roles that default to the strongest Claude model (${strongest.map((r) => code(r.role)).join(", ")}): ` +
-    `your strongest Codex model (for example ${code(models.codex.strongest)}).\n` +
-    "- Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): the adversarial " +
-    "signal comes from model diversity, so use the distinct Codex models available to you. A good default panel " +
-    `on ChatGPT is ${codeList(models.codex.panel)}. If only one model family is reachable, vary reasoning ` +
-    "effort and note in the verdict that diversity was reduced.\n\n" +
-    "`/setup-pstack` writes the configured model list. On Codex, set it to your Codex model slugs."
+    "Skills name single-role defaults and panel slugs from `plugins/pstack/models.json`; each model-consuming " +
+    "skill lists its own in a Models section. On Devin these slugs are `devin_mode` values, passed to " +
+    "`devin_session_create` for every dispatched subagent. This fork keeps every tier on SWE-2:\n\n" +
+    `- Single-model roles: ${code(models.devin.default)}.\n` +
+    `- Roles that default to the strongest tier (${strongest.map((r) => code(r.role)).join(", ")}): ` +
+    `${code(models.devin.strongest)}.\n` +
+    "- Panel roles (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): one child session per " +
+    `panel entry, so ${codeList(models.devin.panel)}. Diversity here comes from different effort tiers of the ` +
+    "same model, which is weaker than true multi-model review; say so in the verdict when a panel matters.\n\n" +
+    "`/setup-pstack` writes the configured model list. On Devin, set it to these `devin_mode` slugs."
   );
 }
 
 // After stamping, skill prose outside the regions the generator owns may name
-// no model: a full claude-* ID is rejected by the Agent tool, and a backticked
-// family name hard-codes a default that belongs in models.json.
+// no model: a full claude-* ID or any non-Devin slug routes a subagent to a
+// model this fork does not carry, and a backticked family name hard-codes a
+// default that belongs in models.json.
 export function strayModelSlugs(file, text, models) {
   const families = models.available.join("|");
-  const SLUG_RE = new RegExp(`claude-(?:${families})[0-9a-z.-]*|\`(?:${families})\``);
+  // Non-Devin slugs (upstream Claude families, gpt-*) are banned outright on
+  // this fork so prose can never name a model SWE-2 cannot run.
+  const legacy = "opus|fable|sonnet|haiku|gpt-[0-9a-z.-]*";
+  const SLUG_RE = new RegExp(`claude-(?:${families}|${legacy}|[0-9])[0-9a-z.-]*|\`(?:${families}|${legacy})\``);
   const lines = text.split("\n");
   const owned = regions(models)
     .filter((r) => r.file === file)

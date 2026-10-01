@@ -5,7 +5,8 @@ description: Watch an open PR — fix failing CI, handle the straightforward rev
 
 # Babysit a PR
 
-On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
+On Devin, read the [platform mapping](../poteto-mode/references/devin-tools.md), including its per-skill notes, before following this skill.
+
 
 Claude Code analog of Cursor's built-in `/babysit`. The implementation is a loop over `gh` CLI plus the Claude Code `loop` skill for pacing.
 

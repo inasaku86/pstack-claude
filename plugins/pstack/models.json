@@ -1,12 +1,12 @@
 {
   "tiers": {
-    "default": "opus",
-    "strongest": "fable",
-    "panel": ["opus", "fable", "sonnet"]
+    "default": "swe-2-medium",
+    "strongest": "swe-2-max",
+    "panel": ["swe-2-max", "swe-2-high", "swe-2-medium"]
   },
   "efforts": ["low", "medium", "high", "xhigh", "max"],
   "defaultEffort": "session",
-  "available": ["opus", "fable", "sonnet", "haiku"],
+  "available": ["swe-2-medium", "swe-2-high", "swe-2-max"],
   "roles": [
     { "role": "feature, refactoring", "models": "default", "skill": "poteto-mode" },
     { "role": "bug-fix", "models": "strongest", "skill": "poteto-mode" },
@@ -26,9 +26,9 @@
     { "role": "architect runners", "models": "panel", "skill": "architect" },
     { "role": "interrogate reviewers", "models": "panel", "skill": "interrogate" }
   ],
-  "codex": {
-    "default": "gpt-6-sol",
-    "strongest": "gpt-6-astra",
-    "panel": ["gpt-6-astra", "gpt-6-sol", "gpt-6-luna"]
+  "devin": {
+    "default": "swe-2-medium",
+    "strongest": "swe-2-max",
+    "panel": ["swe-2-max", "swe-2-high", "swe-2-medium"]
   }
 }
